@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive CSV Plotter</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .container-main {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 28px;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .csv-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .csv-file {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+        
+        .csv-file:hover {
+            border-color: #667eea;
+            background: #e7f0ff;
+        }
+        
+        .csv-file.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .csv-file-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .csv-file-size {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        
+        .columns-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .column-checkbox {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .column-checkbox:hover {
+            background: #e7f0ff;
+            border-color: #667eea;
+        }
+        
+        .column-checkbox input:checked + label {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .column-checkbox input {
+            cursor: pointer;
+            margin-right: 8px;
+        }
+        
+        .column-checkbox label {
+            cursor: pointer;
+            margin: 0;
+            user-select: none;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-checkbox {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .stat-checkbox:hover {
+            background: #e7f0ff;
+            border-color: #667eea;
+        }
+        
+        .stat-checkbox input:checked {
+            accent-color: #667eea;
+        }
+        
+        .stat-checkbox input {
+            cursor: pointer;
+        }
+        
+        .stat-checkbox label {
+            display: block;
+            cursor: pointer;
+            margin: 0;
+            user-select: none;
+            font-weight: 500;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-custom {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .btn-primary-custom {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary-custom:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success-custom {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-success-custom:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+        }
+        
+        #plot-container {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            min-height: 500px;
+            margin-bottom: 30px;
+        }
+        
+        .statistics-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .statistics-table thead {
+            background: #667eea;
+            color: white;
+        }
+        
+        .statistics-table th,
+        .statistics-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .statistics-table tbody tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .correlation-container {
+            background: white;
+            border-radius: 6px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .correlation-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        
+        .correlation-table th,
+        .correlation-table td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        
+        .correlation-table thead {
+            background: #667eea;
+            color: white;
+        }
+        
+        .correlation-value {
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-weight: 600;
+        }
+        
+        .corr-positive {
+            background: rgba(72, 187, 120, 0.3);
+            color: #276749;
+        }
+        
+        .corr-negative {
+            background: rgba(245, 101, 101, 0.3);
+            color: #7c2d12;
+        }
+        
+        .corr-neutral {
+            background: rgba(200, 200, 200, 0.2);
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        
+        .message.info {
+            background: #dbeafe;
+            color: #0c3a8b;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .message.error {
+            background: #fee2e2;
+            color: #7c2d12;
+            border-left: 4px solid #ef4444;
+        }
+        
+        .message.success {
+            background: #dcfce7;
+            color: #166534;
+            border-left: 4px solid #22c55e;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-main" style="max-width: 1400px; margin: 0 auto;">
+        <div class="header">
+            <h1>📊 Interactive CSV Plotter</h1>
+            <p style="margin: 0; opacity: 0.9;">Select, visualize, and analyze your data</p>
+        </div>
+        
+        <div class="content">
+            <!-- Messages -->
+            <div id="message-container"></div>
+            
+            <!-- CSV Selection -->
+            <div class="section">
+                <div class="section-title">1. Select CSV File</div>
+                <div id="csv-list" class="csv-selector">
+                    <div class="loading"><div class="spinner"></div> Loading CSV files...</div>
+                </div>
+            </div>
+            
+            <!-- Column Selection -->
+            <div class="section">
+                <div class="section-title">2. Select Columns to Plot</div>
+                <div id="columns-list" class="columns-grid">
+                    <div class="message info">Select a CSV file first</div>
+                </div>
+            </div>
+            
+            <!-- Statistics Selection -->
+            <div class="section">
+                <div class="section-title">3. Select Statistical Metrics</div>
+                <div class="stats-grid" id="stats-list">
+                    <div class="stat-checkbox">
+                        <input type="checkbox" id="stat-mean" value="mean" checked>
+                        <label for="stat-mean">Mean</label>
+                    </div>
+                    <div class="stat-checkbox">
+                        <input type="checkbox" id="stat-median" value="median" checked>
+                        <label for="stat-median">Median</label>
+                    </div>
+                    <div class="stat-checkbox">
+                        <input type="checkbox" id="stat-std" value="std" checked>
+                        <label for="stat-std">Std Dev</label>
+                    </div>
+                    <div class="stat-checkbox">
+                        <input type="checkbox" id="stat-min" value="min" checked>
+                        <label for="stat-min">Min</label>
+                    </div>
+                    <div class="stat-checkbox">
+                        <input type="checkbox" id="stat-max" value="max" checked>
+                        <label for="stat-max">Max</label>
+                    </div>
+                    <div class="stat-checkbox">
+                        <input type="checkbox" id="stat-count" value="count">
+                        <label for="stat-count">Count</label>
+                    </div>
+                    <div class="stat-checkbox">
+                        <input type="checkbox" id="stat-variance" value="variance">
+                        <label for="stat-variance">Variance</label>
+                    </div>
+                    <div class="stat-checkbox">
+                        <input type="checkbox" id="stat-q25" value="q25">
+                        <label for="stat-q25">Q25</label>
+                    </div>
+                    <div class="stat-checkbox">
+                        <input type="checkbox" id="stat-q75" value="q75">
+                        <label for="stat-q75">Q75</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="section">
+                <div class="button-group">
+                    <button class="btn-custom btn-primary-custom" onclick="plotData()">📈 Generate Plot</button>
+                    <button class="btn-custom btn-success-custom" onclick="calculateStats()">📊 Calculate Statistics</button>
+                    <button class="btn-custom btn-success-custom" onclick="calculateCorrelation()">🔗 Calculate Correlation</button>
+                </div>
+            </div>
+            
+            <!-- Plot -->
+            <div class="section">
+                <div class="section-title">Plot Visualization</div>
+                <div id="plot-container"></div>
+            </div>
+            
+            <!-- Statistics Table -->
+            <div class="section" id="stats-section" style="display: none;">
+                <div class="section-title">Statistical Summary</div>
+                <div id="stats-container"></div>
+            </div>
+            
+            <!-- Correlation Matrix -->
+            <div class="section" id="corr-section" style="display: none;">
+                <div class="section-title">Correlation Matrix</div>
+                <div id="corr-container"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let selectedCsv = null;
+        let loadedColumns = [];
+        
+        // Load CSV list on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCsvList();
+        });
+        
+        function loadCsvList() {
+            fetch('/api/list-csvs')
+                .then(response => response.json())
+                .then(data => {
+                    const csvList = document.getElementById('csv-list');
+                    csvList.innerHTML = '';
+                    
+                    if (data.files.length === 0) {
+                        csvList.innerHTML = '<div class="message error">No CSV files found in csv_filtered/ folder</div>';
+                        return;
+                    }
+                    
+                    data.files.forEach(file => {
+                        const div = document.createElement('div');
+                        div.className = 'csv-file';
+                        div.innerHTML = `
+                            <div class="csv-file-name">${file.name}</div>
+                            <div class="csv-file-size">${file.size}</div>
+                        `;
+                        div.onclick = () => selectCsv(file.path, file.name, div);
+                        csvList.appendChild(div);
+                    });
+                })
+                .catch(error => {
+                    showMessage('Error loading CSV list: ' + error, 'error');
+                });
+        }
+        
+        function selectCsv(path, name, element) {
+            // Update active state
+            document.querySelectorAll('.csv-file').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            
+            selectedCsv = path;
+            
+            // Load columns
+            fetch('/api/load-csv', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({path: path})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadedColumns = data.numeric_columns;
+                    displayColumns(data.numeric_columns);
+                    showMessage(`Loaded ${data.rows.toLocaleString()} rows with ${data.numeric_columns.length} numeric columns`, 'success');
+                    clearContainers();
+                } else {
+                    showMessage('Error: ' + data.error, 'error');
+                }
+            })
+            .catch(error => showMessage('Error loading CSV: ' + error, 'error'));
+        }
+        
+        function displayColumns(columns) {
+            const columnsList = document.getElementById('columns-list');
+            columnsList.innerHTML = '';
+            
+            columns.forEach(col => {
+                const div = document.createElement('div');
+                div.className = 'column-checkbox';
+                div.innerHTML = `
+                    <input type="checkbox" id="col-${col}" value="${col}">
+                    <label for="col-${col}">${col}</label>
+                `;
+                columnsList.appendChild(div);
+            });
+        }
+        
+        function getSelectedColumns() {
+            const checkboxes = document.querySelectorAll('#columns-list input:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+        
+        function getSelectedStats() {
+            const checkboxes = document.querySelectorAll('#stats-list input:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+        
+        function plotData() {
+            if (!selectedCsv) {
+                showMessage('Please select a CSV file first', 'error');
+                return;
+            }
+            
+            const columns = getSelectedColumns();
+            if (columns.length === 0) {
+                showMessage('Please select at least one column to plot', 'error');
+                return;
+            }
+            
+            showMessage('Generating plot...', 'info');
+            
+            fetch('/api/plot-data', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({columns: columns})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    plotGraph(data.series, data.x_label);
+                    showMessage(`Plot generated with ${columns.length} series`, 'success');
+                } else {
+                    showMessage('Error: ' + data.error, 'error');
+                }
+            })
+            .catch(error => showMessage('Error generating plot: ' + error, 'error'));
+        }
+        
+        function plotGraph(series, xLabel) {
+            const traces = series.map(s => ({
+                x: s.x,
+                y: s.y,
+                name: s.name,
+                mode: 'lines',
+                type: 'scatter'
+            }));
+            
+            const layout = {
+                title: 'Data Visualization',
+                xaxis: {title: xLabel},
+                yaxis: {title: 'Value'},
+                hovermode: 'x unified',
+                responsive: true,
+                height: 500
+            };
+            
+            Plotly.newPlot('plot-container', traces, layout, {responsive: true});
+        }
+        
+        function calculateStats() {
+            if (!selectedCsv) {
+                showMessage('Please select a CSV file first', 'error');
+                return;
+            }
+            
+            const columns = getSelectedColumns();
+            const stats = getSelectedStats();
+            
+            if (columns.length === 0) {
+                showMessage('Please select at least one column', 'error');
+                return;
+            }
+            
+            if (stats.length === 0) {
+                showMessage('Please select at least one statistic', 'error');
+                return;
+            }
+            
+            showMessage('Calculating statistics...', 'info');
+            
+            fetch('/api/statistics', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({columns: columns, stats: stats})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayStats(data.statistics, stats);
+                    showMessage('Statistics calculated successfully', 'success');
+                } else {
+                    showMessage('Error: ' + data.error, 'error');
+                }
+            })
+            .catch(error => showMessage('Error calculating statistics: ' + error, 'error'));
+        }
+        
+        function displayStats(statistics, statTypes) {
+            const container = document.getElementById('stats-container');
+            
+            let html = '<table class="statistics-table"><thead><tr><th>Column</th>';
+            statTypes.forEach(stat => {
+                html += `<th>${stat.toUpperCase()}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            for (const [col, stats] of Object.entries(statistics)) {
+                html += `<tr><td><strong>${col}</strong></td>`;
+                statTypes.forEach(stat => {
+                    const value = stats[stat];
+                    html += `<td>${typeof value === 'number' ? value.toFixed(6) : value}</td>`;
+                });
+                html += '</tr>';
+            }
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+            document.getElementById('stats-section').style.display = 'block';
+        }
+        
+        function calculateCorrelation() {
+            if (!selectedCsv) {
+                showMessage('Please select a CSV file first', 'error');
+                return;
+            }
+            
+            const columns = getSelectedColumns();
+            
+            if (columns.length < 2) {
+                showMessage('Please select at least 2 columns for correlation analysis', 'error');
+                return;
+            }
+            
+            showMessage('Calculating correlation matrix...', 'info');
+            
+            fetch('/api/correlation', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({columns: columns})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayCorrelation(data.correlation, data.columns);
+                    showMessage('Correlation matrix calculated', 'success');
+                } else {
+                    showMessage('Error: ' + data.error, 'error');
+                }
+            })
+            .catch(error => showMessage('Error calculating correlation: ' + error, 'error'));
+        }
+        
+        function displayCorrelation(correlation, columns) {
+            const container = document.getElementById('corr-container');
+            
+            let html = '<table class="correlation-table"><thead><tr><th></th>';
+            columns.forEach(col => {
+                html += `<th>${col}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            columns.forEach(row => {
+                html += `<tr><th>${row}</th>`;
+                columns.forEach(col => {
+                    const value = correlation[col][row];
+                    const absValue = Math.abs(value);
+                    let className = 'corr-neutral';
+                    if (value > 0.3) className = 'corr-positive';
+                    else if (value < -0.3) className = 'corr-negative';
+                    
+                    html += `<td><span class="correlation-value ${className}">${value.toFixed(3)}</span></td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+            document.getElementById('corr-section').style.display = 'block';
+        }
+        
+        function showMessage(text, type) {
+            const container = document.getElementById('message-container');
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.textContent = text;
+            container.innerHTML = '';
+            container.appendChild(div);
+            
+            // Auto-remove after 5 seconds if success
+            if (type === 'success') {
+                setTimeout(() => {
+                    div.style.opacity = '0';
+                    setTimeout(() => div.remove(), 300);
+                }, 5000);
+            }
+        }
+        
+        function clearContainers() {
+            document.getElementById('plot-container').innerHTML = '';
+            document.getElementById('stats-section').style.display = 'none';
+            document.getElementById('corr-section').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

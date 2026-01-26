@@ -1,0 +1,364 @@
+Candidate tags (79):
+(ambient temperature)
+  -
+(ambient temperature) vs
+(controller output)
+- **Method:** 
+  - Calculate ratio control error:
+(discharge temperature) - if needed for verification
+- **Method:** 
+  - Convert normal volumetric flow (Nm³/h) to mass flow (kg/h)
+(ratio controller PV),
+(setpoint),
+(shaft speed) vs
+(suction pressure)
+  -
+(suction pressure) vs
+(volumetric flows at normal conditions)
+  -
+,
+- **Alternative:** Request weather station data for humidity if available
+- **Physics:** Humid air is less dense → affects mass flow calculations
+- **Output:** Qualitative assessment and recommendation for humidity measurement
+
+---
+
+### STEP 4: Mass Flow Calculations and Analysis
+
+**Objective:** Calculate actual mass flow rates and analyze relationships with volumetric measurements
+
+#### Step 4.1: Air Mass Flow Calculation
+- **Tags Required:** 
+  -
+- **Design Target:** 0.476 (from design ratios analysis)
+- **Stoichiometric Ratio:** 0.80 (4NH3 : 5O2)
+- **Output:** Actual molar ratio vs design and stoichiometric targets
+
+#### Step 1.4: Identify Operating Regimes
+- **Method:** Cluster analysis or statistical binning
+  - Low load (<80% design)
+  - Normal load (80-100% design)
+  - High load (>100% design)
+- **Cross-reference:** Compare with
+- **Design Target:** 20,346 / 203,445 = 0.100 (10.0% by mass)
+- **Output:** Actual mass ratio vs design target
+
+#### Step 4.4: Turbine IGV vs Mass Flow Relationship
+- **Tags:**
+- **Design Target:** 20,346 kg/h
+- **Output:** Time series of NH3 mass flow
+
+#### Step 4.3: Mass Ratio Analysis
+- **Method:**
+- **Design Target:** 203,445 kg/h (from Operating Manual)
+- **Output:** Time series of mass flow rates
+
+#### Step 4.2: NH3 Mass Flow Calculation
+- **Tags Required:**
+- **Design Target:** From design ratios analysis, NH3 = 9.1 vol% in mix
+- **Expected Result:** IGV opens more in hot weather to maintain constant mass flow
+- **Output:** Feedforward gain (% IGV change per °C)
+
+#### Step 3.3: Pressure Effects on Air Flow
+- **Tags:**
+- **Expected Values:**
+  - NH3: ~46,950 Nm³/h (3 × 15,650)
+  - Air: ~416,640 Nm³/h (3 × 138,880)
+- **Output:** Time series of total flows
+
+#### Step 1.2: Calculate Volumetric Ratio
+- **Method:**
+- **Method:**
+- **Method:**
+  - 2D scatter plot to visualize coordinated movement
+  - Calculate correlation (expected: -0.921 from prior analysis)
+  - Identify operating constraints (mutual exclusion zones)
+- **Process Context:** IGVs move in opposite directions due to pressure control coupling
+- **Reference:** Operating Manual Analysis Section on Process Coupling
+- **Output:** Correlation plot with operating envelope boundaries
+
+#### Step 2.4: Shaft Speed Relationship
+- **Tags:**
+- **Method:**
+  - Analyze correlation (expected to be weak/indirect)
+  - Cross-lag correlation analysis (time delays)
+- **Process Context:** Tailgas IGV controls plant pressure, not directly air flow
+- **Expected Result:** Weak direct correlation, but coupled through common shaft
+- **Output:** Correlation coefficient and lag analysis
+
+#### Step 2.3: IGV Interaction Analysis
+- **Tags:**
+- **Method:**
+  - Analyze feedforward compensation behavior
+  - Identify if APC system adjusts IGV based on ambient temperature
+- **Control Context:** TAG_CROSS_REFERENCE.md shows feedforward path:
+- **Method:**
+  - Analyze speed variations with IGV position changes
+  - Confirm common shaft coupling mechanism
+- **Process Context:** All 4 machines (steam turbine, air compressor, NO compressor, tailgas turbine) on common shaft
+- **Reference:** Operating Manual Section 3.1, Page 26 - Common shaft drive train
+- **Output:** Speed vs flow relationship, confirm mechanical coupling
+
+---
+
+### STEP 3: Environmental Impact Analysis
+
+**Objective:** Quantify effects of ambient conditions on air flow and turbine performance
+
+#### Step 3.1: Ambient Temperature Effects on Volumetric Flow
+- **Tags:**
+- **Method:**
+  - Analyze variations in atmospheric pressure (weather changes)
+  - Calculate impact on volumetric flow measurement
+- **Physics:** Lower atmospheric pressure → lower air density → higher volumetric flow for same mass flow
+- **Output:** Pressure correction factor analysis
+
+#### Step 3.4: Humidity Impact (Indirect Analysis)
+- **Available Data:** No direct humidity measurement in historian
+- **Method:** 
+  - Use ambient temperature as proxy (assume typical humidity-temperature correlation)
+  - Analyze unexplained variance in air flow after temperature correction
+  - Calculate residuals:
+- **Method:**
+  - Group data by temperature bins (5°C intervals)
+  - Calculate average volumetric flow for constant IGV position across temperature ranges
+  - Analyze temperature correction factor
+- **Physics:** For constant mass flow, volumetric flow increases with temperature
+- **Method:**
+  - Linear regression analysis
+  - Compare with volumetric flow relationship
+  - Assess if IGV control is based on mass flow or volumetric flow
+- **Expected Result:** Mass flow control is the actual objective (constant mass ratio NH3:Air)
+- **Output:** Regression analysis, control strategy confirmation
+
+#### Step 4.5: Ambient Correction Validation
+- **Method:**
+  - Compare mass flow variation vs volumetric flow variation across ambient conditions
+  - Validate if feedforward compensation maintains constant mass flow
+- **Expected Result:** Mass flow should be more stable than volumetric flow across temperature changes
+- **Reference:** APC feedforward compensation design from TAG_CROSS_REFERENCE.md
+- **Output:** Statistical comparison (CV% for mass flow vs volumetric flow)
+
+---
+
+## ANALYSIS METHODS AND TOOLS
+
+### Statistical Methods
+
+1. **Descriptive Statistics**
+   - Mean, median, standard deviation, min/max for all variables
+   - Coefficient of variation (CV%) to assess control stability
+   - Percentile analysis (5th, 25th, 75th, 95th)
+
+2. **Correlation Analysis**
+   - Pearson correlation coefficients (linear relationships)
+   - Spearman rank correlation (non-linear monotonic relationships)
+   - Cross-correlation with time lags (dynamic responses)
+
+3. **Regression Analysis**
+   - Linear regression (primary method)
+   - Polynomial regression (if non-linearities detected)
+   - Multiple linear regression (environmental corrections)
+
+4. **Time Series Analysis**
+   - Trend analysis (long-term drift)
+   - Seasonal/diurnal patterns (day/night, summer/winter)
+   - Step response analysis (IGV changes → flow response)
+
+### Software Tools
+
+- **Python** with libraries:
+  -
+- **Method:** 
+  - Scatter plot with linear regression
+  - Calculate Pearson correlation coefficient
+  - Identify non-linearities at extreme IGV positions
+- **Expected Result:** Strong positive correlation (reference: +0.925 from prior analysis)
+- **Output:** Regression equation, R² value, residual analysis
+
+#### Step 2.2: Tailgas Turbine IGV vs Air Flow (Indirect Effect)
+- **Tags:**
+- **Output:** Time series of actual ratios vs design target
+
+#### Step 1.3: Calculate Molar NH3:O2 Ratio
+- **Method:** Assuming air composition (21% O2, 79% N2):
+- Assess controller performance (response time, overshoot, settling)
+- **Reference:** Operating Manual states FV95008 should operate at 60-80% position
+- **Output:** Control performance metrics and valve position distribution
+
+---
+
+### STEP 2: Turbine IGV and Air Flow Correlation Study
+
+**Objective:** Quantify relationship between turbine vane positions and incoming air flow
+
+#### Step 2.1: Air Compressor IGV vs Volumetric Air Flow
+- **Tags:**
+- For Nm³/h (already at normal conditions), simplify to:
+- data manipulation
+  -
+- numerical calculations
+  -
+- statistical analysis
+  -
+- visualization
+  -
+/
+95FFIC008/OUT
+95FFIC008/PV
+95FFIC008/SP
+95FI003A/PV
+95FI003B/PV
+95FI003C/PV
+95FI004A/PV
+95FI004B/PV
+95FI004C/PV
+95HIC403/PV
+95HIC404/PV
+95PI002/PV
+95PI006/PV
+95PI007A/PV
+95SI470/PV
+95TI008/PV
+95TI417/PV
+95TI417/PV (Ambient T) → APC Controller → 95HIC403/PV (Air IGV)
+Air density at normal conditions (0°C, 101.325 kPa) = 1.293 kg/Nm³
+  Mass_Flow = Volumetric_Flow × ρ_normal × (P_actual/P_normal) × (T_normal/T_actual)
+CSV/Parquet
+Design_Ratio = 9.1 / (100 - 9.1) = 0.100 (NH3:Air volumetric ratio)
+Mass_Flow = Volumetric_Flow × 1.293 kg/Nm³
+Mass_Ratio = NH3_Mass_Flow / Air_Mass_Flow
+NAP2_Plant_Load.NAP2_Load_Output
+NH3 density at normal conditions = 0.771 kg/Nm³
+  NH3_Mass_Flow = Total_NH3_Flow × 0.771 kg/Nm³
+O2_Flow = Total_Air_Flow × 0.21
+  Molar_Ratio = Total_NH3_Flow / O2_Flow
+P_actual/P_normal
+Q_actual = Q_normal × (T_actual / T_normal)
+Seasonal/diurnal
+T_normal/T_actual
+Total_Air_Flow
+Total_NH3_Flow
+Total_NH3_Flow = 95FI003A/PV + 95FI003B/PV + 95FI003C/PV
+  Total_Air_Flow = 95FI004A/PV + 95FI004B/PV + 95FI004C/PV
+Volumetric_Ratio = Total_NH3_Flow / Total_Air_Flow
+and
+day/night
+kg/h
+min/max
+summer/winter
+tag
+- **Output:** Ratio statistics by operating regime
+
+#### Step 1.5: Analyze Ratio Control Valve Performance
+- **Tags:**
+vs
+weak/indirect
+where Q = volumetric flow, T = absolute temperature
+- **Expected Result:** Positive correlation (higher temp → higher volumetric flow for same mass flow)
+- **Reference:** Operating Manual Section 6.1 mentions ambient temperature affects operation
+- **Output:** Temperature sensitivity coefficient (Nm³/h per °C)
+
+#### Step 3.2: Ambient Temperature Effects on Turbine IGV
+- **Tags:**
+
+CSV files checked (8):
+File: c:/Users/EvanJacobs/Documents/OmniaOffline/Parquet to CSV and CLean/csv_output\ANP2 for July - Nov 2025\pi_data_20251230_125107.csv
+  Status: MISSING
+  Missing count: 79
+  Missing sample: (ambient temperature)
+  -,(ambient temperature) vs,(controller output)
+- **Method:** 
+  - Calculate ratio control error:,(discharge temperature) - if needed for verification
+- **Method:** 
+  - Convert normal volumetric flow (Nm³/h) to mass flow (kg/h),(ratio controller PV),,(setpoint),,(shaft speed) vs,(suction pressure)
+  -,(suction pressure) vs,(volumetric flows at normal conditions)
+  -
+  Present sample: 
+File: c:/Users/EvanJacobs/Documents/OmniaOffline/Parquet to CSV and CLean/csv_output\ANP2 for July - Nov 2025\pi_data_20251230_132810.csv
+  Status: MISSING
+  Missing count: 79
+  Missing sample: (ambient temperature)
+  -,(ambient temperature) vs,(controller output)
+- **Method:** 
+  - Calculate ratio control error:,(discharge temperature) - if needed for verification
+- **Method:** 
+  - Convert normal volumetric flow (Nm³/h) to mass flow (kg/h),(ratio controller PV),,(setpoint),,(shaft speed) vs,(suction pressure)
+  -,(suction pressure) vs,(volumetric flows at normal conditions)
+  -
+  Present sample: 
+File: c:/Users/EvanJacobs/Documents/OmniaOffline/Parquet to CSV and CLean/csv_output\ANP2 for July - Nov 2025\pi_data_20251230_141953.csv
+  Status: MISSING
+  Missing count: 79
+  Missing sample: (ambient temperature)
+  -,(ambient temperature) vs,(controller output)
+- **Method:** 
+  - Calculate ratio control error:,(discharge temperature) - if needed for verification
+- **Method:** 
+  - Convert normal volumetric flow (Nm³/h) to mass flow (kg/h),(ratio controller PV),,(setpoint),,(shaft speed) vs,(suction pressure)
+  -,(suction pressure) vs,(volumetric flows at normal conditions)
+  -
+  Present sample: 
+File: c:/Users/EvanJacobs/Documents/OmniaOffline/Parquet to CSV and CLean/csv_output\ANP2 for July - Nov 2025\pi_data_20251230_143627.csv
+  Status: MISSING
+  Missing count: 79
+  Missing sample: (ambient temperature)
+  -,(ambient temperature) vs,(controller output)
+- **Method:** 
+  - Calculate ratio control error:,(discharge temperature) - if needed for verification
+- **Method:** 
+  - Convert normal volumetric flow (Nm³/h) to mass flow (kg/h),(ratio controller PV),,(setpoint),,(shaft speed) vs,(suction pressure)
+  -,(suction pressure) vs,(volumetric flows at normal conditions)
+  -
+  Present sample: 
+File: c:/Users/EvanJacobs/Documents/OmniaOffline/Parquet to CSV and CLean/csv_output\NAP2 for July - Nov 2025\pi_data_20251229_151817.csv
+  Status: MISSING
+  Missing count: 62
+  Missing sample: (ambient temperature)
+  -,(ambient temperature) vs,(controller output)
+- **Method:** 
+  - Calculate ratio control error:,(discharge temperature) - if needed for verification
+- **Method:** 
+  - Convert normal volumetric flow (Nm³/h) to mass flow (kg/h),(ratio controller PV),,(setpoint),,(shaft speed) vs,(suction pressure)
+  -,(suction pressure) vs,(volumetric flows at normal conditions)
+  -
+  Present sample: 95FFIC008/OUT,95FFIC008/PV,95FFIC008/SP,95FI003A/PV,95FI003B/PV,95FI003C/PV,95FI004A/PV,95FI004B/PV,95FI004C/PV,95HIC403/PV
+File: c:/Users/EvanJacobs/Documents/OmniaOffline/Parquet to CSV and CLean/csv_output\NAP2 for July - Nov 2025\pi_data_20251229_155201.csv
+  Status: MISSING
+  Missing count: 62
+  Missing sample: (ambient temperature)
+  -,(ambient temperature) vs,(controller output)
+- **Method:** 
+  - Calculate ratio control error:,(discharge temperature) - if needed for verification
+- **Method:** 
+  - Convert normal volumetric flow (Nm³/h) to mass flow (kg/h),(ratio controller PV),,(setpoint),,(shaft speed) vs,(suction pressure)
+  -,(suction pressure) vs,(volumetric flows at normal conditions)
+  -
+  Present sample: 95FFIC008/OUT,95FFIC008/PV,95FFIC008/SP,95FI003A/PV,95FI003B/PV,95FI003C/PV,95FI004A/PV,95FI004B/PV,95FI004C/PV,95HIC403/PV
+File: c:/Users/EvanJacobs/Documents/OmniaOffline/Parquet to CSV and CLean/csv_output\NAP2 for July - Nov 2025\pi_data_20251230_082720.csv
+  Status: MISSING
+  Missing count: 62
+  Missing sample: (ambient temperature)
+  -,(ambient temperature) vs,(controller output)
+- **Method:** 
+  - Calculate ratio control error:,(discharge temperature) - if needed for verification
+- **Method:** 
+  - Convert normal volumetric flow (Nm³/h) to mass flow (kg/h),(ratio controller PV),,(setpoint),,(shaft speed) vs,(suction pressure)
+  -,(suction pressure) vs,(volumetric flows at normal conditions)
+  -
+  Present sample: 95FFIC008/OUT,95FFIC008/PV,95FFIC008/SP,95FI003A/PV,95FI003B/PV,95FI003C/PV,95FI004A/PV,95FI004B/PV,95FI004C/PV,95HIC403/PV
+File: c:/Users/EvanJacobs/Documents/OmniaOffline/Parquet to CSV and CLean/csv_output\NAP2 for July - Nov 2025\pi_data_20251230_092335.csv
+  Status: MISSING
+  Missing count: 62
+  Missing sample: (ambient temperature)
+  -,(ambient temperature) vs,(controller output)
+- **Method:** 
+  - Calculate ratio control error:,(discharge temperature) - if needed for verification
+- **Method:** 
+  - Convert normal volumetric flow (Nm³/h) to mass flow (kg/h),(ratio controller PV),,(setpoint),,(shaft speed) vs,(suction pressure)
+  -,(suction pressure) vs,(volumetric flows at normal conditions)
+  -
+  Present sample: 95FFIC008/OUT,95FFIC008/PV,95FFIC008/SP,95FI003A/PV,95FI003B/PV,95FI003C/PV,95FI004A/PV,95FI004B/PV,95FI004C/PV,95HIC403/PV
+
+Tags present in ALL CSVs (intersection):
+timestamp
