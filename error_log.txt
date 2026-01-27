@@ -212,3 +212,35 @@
 [2026-01-27 09:58:52] [SUCCESS] Saved: NAP2 for July - Nov 2025/pi_data_20251230_082720_filtered.csv (178560 rows, 71 columns, 116.80 MB)
 [2026-01-27 09:59:00] [SUCCESS] Saved: NAP2 for July - Nov 2025/pi_data_20251229_151817_filtered.csv (178560 rows, 71 columns, 116.44 MB)
 [2026-01-27 09:59:07] [SUCCESS] Saved: NAP2 for July - Nov 2025/pi_data_20251229_155201_filtered.csv (172800 rows, 71 columns, 112.74 MB)
+[2026-01-27 11:32:06] [INFO] CSV Column Filter (Web) initialized
+[2026-01-27 11:32:06] [INFO] Found 8 CSV file(s)
+[2026-01-27 11:32:06] [INFO] Browser window opening...
+[2026-01-27 11:33:14] [INFO] CSV Column Filter (Web) initialized
+[2026-01-27 11:33:14] [INFO] Found 8 CSV file(s)
+[2026-01-27 11:33:14] [INFO] Browser window opening...
+[2026-01-27 11:33:42] [VALIDATING] pi_data_20251230_082720.csv
+[2026-01-27 11:33:45] [VALIDATING] pi_data_20251229_155201.csv
+[2026-01-27 11:33:48] [VALIDATING] pi_data_20251229_151817.csv
+[2026-01-27 11:33:50] [VALIDATING] pi_data_20251230_092335.csv
+[2026-01-27 11:33:53] [SUCCESS] Validated 4 files with matching columns: 189 columns
+[2026-01-27 16:10:02] [INFO] CSV Column Filter (Web) initialized
+[2026-01-27 16:10:02] [INFO] Found 8 CSV file(s)
+[2026-01-27 16:10:02] [INFO] Browser window opening...
+[2026-01-27 16:10:26] [VALIDATING] pi_data_20251229_155201.csv
+[2026-01-27 16:10:29] [VALIDATING] pi_data_20251230_082720.csv
+[2026-01-27 16:10:33] [SUCCESS] Validated 2 files with matching columns: 189 columns
+[2026-01-27 16:10:50] [VALIDATING] pi_data_20251230_132810.csv
+[2026-01-27 16:10:51] [VALIDATING] pi_data_20251230_125107.csv
+[2026-01-27 16:10:52] [SUCCESS] Validated 2 files with matching columns: 63 columns
+[2026-01-27 16:16:20] ================================================================================
+[2026-01-27 16:16:20] WEB-BASED INTERACTIVE PLOTTER STARTED
+[2026-01-27 16:16:20] [INFO] Starting Flask server on http://localhost:5000
+[2026-01-27 16:18:29] [INFO] Listed 8 CSV files
+[2026-01-27 16:19:00] [USER] Loaded CSV: pi_data_20251229_151817_filtered.csv
+[2026-01-27 16:19:00]   - Rows: 178,560
+[2026-01-27 16:19:00]   - Columns: 71
+[2026-01-27 16:19:00]   - Numeric columns: 70
+[2026-01-27 16:22:58] ================================================================================
+[2026-01-27 16:22:58] WEB-BASED INTERACTIVE PLOTTER STARTED
+[2026-01-27 16:22:58] [INFO] Starting Flask server on http://localhost:5000
+[2026-01-27 16:23:05] [INFO] Listed 8 CSV files
