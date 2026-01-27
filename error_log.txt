@@ -192,3 +192,23 @@
 [2026-01-23 12:11:37] [USER] Plotted 6 columns
 [2026-01-23 12:16:04] [USER] Calculated statistics for 6 columns
 [2026-01-23 12:16:09] [USER] Calculated correlation for 6 columns
+[2026-01-27 09:07:07] [INFO] CSV Column Filter (Web) initialized
+[2026-01-27 09:07:07] [INFO] Found 8 CSV file(s)
+[2026-01-27 09:07:07] [INFO] Browser window opening...
+[2026-01-27 09:15:16] [INFO] CSV Column Filter (Web) initialized
+[2026-01-27 09:15:16] [INFO] Found 8 CSV file(s)
+[2026-01-27 09:15:16] [INFO] Browser window opening...
+[2026-01-27 09:15:24] [VALIDATING] pi_data_20251230_125107.csv
+[2026-01-27 09:15:25] [VALIDATING] pi_data_20251230_132810.csv
+[2026-01-27 09:15:26] [VALIDATING] pi_data_20251230_141953.csv
+[2026-01-27 09:15:27] [VALIDATING] pi_data_20251230_143627.csv
+[2026-01-27 09:15:28] [SUCCESS] Validated 4 files with matching columns: 63 columns
+[2026-01-27 09:50:40] [VALIDATING] pi_data_20251230_092335.csv
+[2026-01-27 09:50:44] [VALIDATING] pi_data_20251230_082720.csv
+[2026-01-27 09:50:47] [VALIDATING] pi_data_20251229_151817.csv
+[2026-01-27 09:50:50] [VALIDATING] pi_data_20251229_155201.csv
+[2026-01-27 09:50:53] [SUCCESS] Validated 4 files with matching columns: 189 columns
+[2026-01-27 09:58:45] [SUCCESS] Saved: NAP2 for July - Nov 2025/pi_data_20251230_092335_filtered.csv (172800 rows, 71 columns, 113.23 MB)
+[2026-01-27 09:58:52] [SUCCESS] Saved: NAP2 for July - Nov 2025/pi_data_20251230_082720_filtered.csv (178560 rows, 71 columns, 116.80 MB)
+[2026-01-27 09:59:00] [SUCCESS] Saved: NAP2 for July - Nov 2025/pi_data_20251229_151817_filtered.csv (178560 rows, 71 columns, 116.44 MB)
+[2026-01-27 09:59:07] [SUCCESS] Saved: NAP2 for July - Nov 2025/pi_data_20251229_155201_filtered.csv (172800 rows, 71 columns, 112.74 MB)

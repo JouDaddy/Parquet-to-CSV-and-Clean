@@ -362,17 +362,20 @@
         <div class="content">
             <!-- File Selection -->
             <div class="section" id="fileSection">
-                <h2 class="section-title">Step 1: Select CSV File</h2>
+                <h2 class="section-title">Step 1: Select CSV Files (with matching headers)</h2>
                 <div class="file-selector">
                     {% for file in files %}
-                    <div class="file-option" onclick="selectFile({{ file.index }}, '{{ file.display }}', {{ file.size | replace(' MB', '') | float }})">
+                    <div class="file-option" onclick="toggleFile({{ file.index }}, '{{ file.display }}', {{ file.size | replace(' MB', '') | float }})">
                         <div class="file-info">
                             <span class="file-name">{{ file.display }}</span>
                             <span class="file-size">{{ file.size }}</span>
                         </div>
-                        <input type="radio" name="csvFile" class="fileRadio">
+                        <input type="checkbox" name="csvFile" class="fileCheckbox" data-index="{{ file.index }}">
                     </div>
                     {% endfor %}
+                </div>
+                <div class="button-group">
+                    <button class="btn-primary" onclick="loadSelectedFiles()" id="loadBtn">Load Selected Files</button>
                 </div>
             </div>
             
@@ -380,19 +383,14 @@
             <div class="section hidden-section" id="columnSection">
                 <h2 class="section-title">Step 2: Select Columns to Keep</h2>
                 
-                <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="Search columns or tags... (e.g., '96LIC001' or 'timestamp')" onkeyup="filterColumns()">
-                    <span class="search-icon">🔍</span>
-                </div>
-                
                 <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-label">Selected Files</div>
+                        <div class="stat-value" id="selectedFiles">0</div>
+                    </div>
                     <div class="stat-box">
                         <div class="stat-label">Total Columns</div>
                         <div class="stat-value" id="totalColumns">0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Rows in File</div>
-                        <div class="stat-value" id="totalRows">0</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-label">Selected</div>
@@ -400,12 +398,17 @@
                     </div>
                 </div>
                 
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search columns or tags... (e.g., '96LIC001' or 'timestamp')" onkeyup="filterColumns()">
+                    <span class="search-icon">🔍</span>
+                </div>
+                
                 <div class="columns-container" id="columnsContainer"></div>
                 
                 <div class="button-group">
                     <button class="btn-secondary" onclick="selectAll()">Select All</button>
                     <button class="btn-secondary" onclick="deselectAll()">Deselect All</button>
-                    <button class="btn-primary" onclick="saveFiltered()" id="saveBtn">Save Filtered CSV</button>
+                    <button class="btn-primary" onclick="saveFiltered()" id="saveBtn">Save Filtered CSVs</button>
                 </div>
                 
                 <div class="status" id="status"></div>
@@ -414,7 +417,7 @@
     </div>
     
     <script>
-        let currentFile = null;
+        let selectedFiles = [];
         let structuredColumns = [];
 
         function renderColumns() {
@@ -502,33 +505,58 @@
             });
         }
         
-        function selectFile(index, display, size) {
-            currentFile = index;
-            document.querySelector('#columnSection').classList.remove('hidden-section');
+        function toggleFile(index, display, size) {
+            const checkbox = event.currentTarget.querySelector('.fileCheckbox');
+            checkbox.checked = !checkbox.checked;
+            event.currentTarget.classList.toggle('selected', checkbox.checked);
             
-            document.querySelectorAll('.file-option').forEach(el => el.classList.remove('selected'));
-            event.currentTarget.classList.add('selected');
+            if (checkbox.checked) {
+                selectedFiles.push(index);
+            } else {
+                selectedFiles = selectedFiles.filter(i => i !== index);
+            }
+        }
+
+        function loadSelectedFiles() {
+            if (selectedFiles.length === 0) {
+                showStatus('Please select at least one file.', 'error');
+                return;
+            }
             
-            document.getElementById('columnsContainer').innerHTML = '<div class="spinner"></div>';
+            if (selectedFiles.length === 1) {
+                showStatus('Please select multiple files with matching headers.', 'error');
+                return;
+            }
             
-            fetch('/api/load-csv', {
+            document.getElementById('loadBtn').disabled = true;
+            document.getElementById('loadBtn').textContent = 'Loading...';
+            
+            fetch('/api/validate-files', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ index: index })
+                body: JSON.stringify({ indices: selectedFiles })
             })
             .then(response => response.json())
             .then(data => {
+                document.getElementById('loadBtn').disabled = false;
+                document.getElementById('loadBtn').textContent = 'Load Selected Files';
+                
                 if (data.success) {
                     structuredColumns = data.columns;
                     renderColumns();
+                    document.getElementById('selectedFiles').textContent = data.total_files;
                     document.getElementById('totalColumns').textContent = data.total_columns;
-                    document.getElementById('totalRows').textContent = data.rows.toLocaleString();
-                    showStatus(`Loaded: ${data.filename}`, 'success');
+                    document.getElementById('columnSection').classList.remove('hidden-section');
+                    showStatus(`Loaded ${data.total_files} files with matching columns`, 'success');
                 } else {
-                    showStatus('Error loading file: ' + data.error, 'error');
+                    showStatus('Error: ' + data.error, 'error');
                 }
             })
-            .catch(error => showStatus('Error: ' + error, 'error'));
+            .catch(error => {
+                document.getElementById('loadBtn').disabled = false;
+                document.getElementById('loadBtn').textContent = 'Load Selected Files';
+                showStatus('Error: ' + error, 'error');
+            });
         }
         
         function filterColumns() {
@@ -604,17 +632,21 @@
             .then(response => response.json())
             .then(data => {
                 document.getElementById('saveBtn').disabled = false;
-                document.getElementById('saveBtn').textContent = 'Save Filtered CSV';
+                document.getElementById('saveBtn').textContent = 'Save Filtered CSVs';
                 
                 if (data.success) {
-                    showStatus(`Successfully saved! File: ${data.path} (${data.rows} rows, ${data.columns} columns, ${data.size})`, 'success');
+                    let message = `Successfully saved ${data.total_saved} files:\n`;
+                    data.results.forEach(result => {
+                        message += `${result.path} (${result.rows} rows, ${result.columns} columns, ${result.size})\n`;
+                    });
+                    showStatus(message.trim(), 'success');
                 } else {
                     showStatus('Error saving: ' + data.error, 'error');
                 }
             })
             .catch(error => {
                 document.getElementById('saveBtn').disabled = false;
-                document.getElementById('saveBtn').textContent = 'Save Filtered CSV';
+                document.getElementById('saveBtn').textContent = 'Save Filtered CSVs';
                 showStatus('Error: ' + error, 'error');
             });
         }

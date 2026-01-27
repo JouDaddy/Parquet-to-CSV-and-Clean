@@ -30,7 +30,7 @@ from flask import Flask, render_template, request, jsonify
 import json
 
 # Configuration
-BASE_DIR = Path(r"c:\Users\EvanJacobs\Documents\OmniaOffline\Data Cleaning")
+BASE_DIR = Path(r"c:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean")
 CSV_OUTPUT = BASE_DIR / "csv_output"
 FILTERED_OUTPUT = BASE_DIR / "csv_filtered"
 ERROR_LOG = BASE_DIR / "error_log.txt"
@@ -50,8 +50,8 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 # Global state
 csv_files = []
-current_csv = None
-current_df = None
+selected_csvs = []  # List of selected CSV files
+current_dfs = {}  # Dict of filename to dataframe
 current_columns = []
 
 def find_csv_files():
@@ -98,26 +98,44 @@ def index():
     
     return render_template('filter.html', files=file_list)
 
-@app.route('/api/load-csv', methods=['POST'])
-def load_csv():
-    """Load CSV and return columns with hierarchy"""
-    global current_csv, current_df, current_columns
+@app.route('/api/validate-files', methods=['POST'])
+def validate_files():
+    """Validate selected files have matching columns"""
+    global selected_csvs, current_dfs, current_columns
     
     try:
-        file_index = request.json.get('index')
-        current_csv = csv_files[file_index]
+        file_indices = request.json.get('indices', [])
+        if not file_indices:
+            return jsonify({'success': False, 'error': 'No files selected'})
         
-        log_to_file(f"[LOADING] {current_csv.name}")
-        current_df = pd.read_csv(current_csv, encoding='utf-8-sig')
-        current_columns = list(current_df.columns)
+        selected_csvs = [csv_files[i] for i in file_indices]
+        current_dfs = {}
+        column_sets = []
         
-        # --- New, more robust structured column logic ---
+        for csv_file in selected_csvs:
+            log_to_file(f"[VALIDATING] {csv_file.name}")
+            df = pd.read_csv(csv_file, encoding='utf-8-sig')
+            current_dfs[csv_file.name] = df
+            columns = list(df.columns)
+            column_sets.append(set(columns))
+        
+        # Check if all files have the same columns
+        first_columns = column_sets[0]
+        all_match = all(cols == first_columns for cols in column_sets)
+        
+        if not all_match:
+            return jsonify({
+                'success': False, 
+                'error': 'Selected files have different column structures. Please select files with matching headers.'
+            })
+        
+        current_columns = list(first_columns)
         hierarchy = build_column_hierarchy(current_columns)
+        
         processed_items = set()
         structured_columns = []
 
         for col in current_columns:
-            # Defensive check: Ensure column is a string to prevent downstream errors
             if not isinstance(col, str):
                 log_to_file(f"[WARNING] Skipping non-string column header: {col}")
                 continue
@@ -125,14 +143,12 @@ def load_csv():
             if col in processed_items:
                 continue
 
-            # Handle Timestamp
             is_timestamp = col.lstrip('\ufeff').lower() == 'timestamp'
             if is_timestamp:
                 structured_columns.append({'id': col, 'type': 'timestamp'})
                 processed_items.add(col)
                 continue
 
-            # Handle Parent groups (either by finding a child or the parent itself)
             parent_name_of_col = col.split('/')[0] if '/' in col else col
             if parent_name_of_col in hierarchy:
                 parent_group = hierarchy[parent_name_of_col]
@@ -141,39 +157,36 @@ def load_csv():
                     'type': 'parent',
                     'children': parent_group['children']
                 })
-                # Mark parent and all its children as processed
                 processed_items.add(parent_group['parent'])
                 for child_col in parent_group['children']:
                     processed_items.add(child_col)
-            
-            # Handle Standalone columns
             else:
                 structured_columns.append({'id': col, 'type': 'standalone'})
                 processed_items.add(col)
 
-        log_to_file(f"[SUCCESS] Loaded {current_csv.name}: {len(current_df)} rows, {len(current_columns)} columns")
+        log_to_file(f"[SUCCESS] Validated {len(selected_csvs)} files with matching columns: {len(current_columns)} columns")
         
         return jsonify({
             'success': True,
-            'filename': current_csv.name,
-            'rows': len(current_df),
-            'columns': structured_columns, # Return the new structured list
-            'total_columns': len(current_columns)
+            'files': [f.name for f in selected_csvs],
+            'columns': structured_columns,
+            'total_columns': len(current_columns),
+            'total_files': len(selected_csvs)
         })
     
     except Exception as e:
-        error_msg = f"Failed to load CSV: {str(e)}"
+        error_msg = f"Failed to validate files: {str(e)}"
         log_to_file(f"[ERROR] {error_msg}")
         return jsonify({'success': False, 'error': error_msg})
 
 @app.route('/api/save-filtered', methods=['POST'])
 def save_filtered():
-    """Save filtered CSV"""
-    global current_csv, current_df
+    """Save filtered CSVs for all selected files"""
+    global selected_csvs, current_dfs
     
     try:
-        if current_df is None:
-            raise ValueError("No CSV loaded")
+        if not current_dfs:
+            raise ValueError("No files loaded")
         
         selected_columns = request.json.get('selected_columns', [])
 
@@ -181,51 +194,58 @@ def save_filtered():
             raise ValueError("No columns selected to save.")
 
         # --- Enforce Timestamp as First Column ---
-        # Find the exact timestamp column name from the dataframe
         timestamp_col = None
-        for col in current_df.columns:
+        for col in list(current_dfs.values())[0].columns:  # Use first df to find timestamp
             if col.lstrip('\ufeff').lower() == 'timestamp':
                 timestamp_col = col
                 break
         
-        final_columns = list(selected_columns) # Work with a copy
+        final_columns = list(selected_columns)
 
         if timestamp_col:
-            # If timestamp is in the list, remove it to re-insert at the start
             if timestamp_col in final_columns:
                 final_columns.remove(timestamp_col)
-            
-            # Insert timestamp at the very beginning
             final_columns.insert(0, timestamp_col)
         # --- End of Timestamp Logic ---
         
-        # Get source folder
-        source_folder = current_csv.parent.name
-        filtered_subfolder = FILTERED_OUTPUT / source_folder
-        filtered_subfolder.mkdir(parents=True, exist_ok=True)
+        results = []
+        total_saved = 0
         
-        # Create filtered dataframe
-        # Ensure no duplicates from the timestamp logic
-        final_columns_unique = list(dict.fromkeys(final_columns))
-        filtered_df = current_df[final_columns_unique]
-        
-        # Save
-        original_name = current_csv.stem
-        filtered_name = f"{original_name}_filtered.csv"
-        output_path = filtered_subfolder / filtered_name
-        
-        filtered_df.to_csv(output_path, index=False, encoding='utf-8')
-        
-        file_size = output_path.stat().st_size / (1024 * 1024)
-        log_to_file(f"[SUCCESS] Saved: {source_folder}/{filtered_name} ({len(filtered_df)} rows, {len(final_columns_unique)} columns, {file_size:.2f} MB)")
+        for csv_file in selected_csvs:
+            df = current_dfs[csv_file.name]
+            
+            # Get source folder
+            source_folder = csv_file.parent.name
+            filtered_subfolder = FILTERED_OUTPUT / source_folder
+            filtered_subfolder.mkdir(parents=True, exist_ok=True)
+            
+            # Create filtered dataframe
+            final_columns_unique = list(dict.fromkeys(final_columns))
+            filtered_df = df[final_columns_unique]
+            
+            # Save
+            original_name = csv_file.stem
+            filtered_name = f"{original_name}_filtered.csv"
+            output_path = filtered_subfolder / filtered_name
+            
+            filtered_df.to_csv(output_path, index=False, encoding='utf-8')
+            
+            file_size = output_path.stat().st_size / (1024 * 1024)
+            log_to_file(f"[SUCCESS] Saved: {source_folder}/{filtered_name} ({len(filtered_df)} rows, {len(final_columns_unique)} columns, {file_size:.2f} MB)")
+            
+            results.append({
+                'filename': filtered_name,
+                'path': f"{source_folder}/{filtered_name}",
+                'rows': len(filtered_df),
+                'columns': len(final_columns_unique),
+                'size': f"{file_size:.2f} MB"
+            })
+            total_saved += 1
         
         return jsonify({
             'success': True,
-            'filename': filtered_name,
-            'path': f"{source_folder}/{filtered_name}",
-            'rows': len(filtered_df),
-            'columns': len(final_columns_unique),
-            'size': f"{file_size:.2f} MB"
+            'results': results,
+            'total_saved': total_saved
         })
     
     except Exception as e:
