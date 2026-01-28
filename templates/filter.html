@@ -141,6 +141,53 @@
             overflow-y: auto;
         }
         
+        .folder-options {
+            margin-bottom: 20px;
+        }
+        
+        .folder-option {
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            background: white;
+        }
+        
+        .folder-option input[type="radio"] {
+            margin-right: 10px;
+            accent-color: #667eea;
+        }
+        
+        .folder-option label {
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+        }
+        
+        .folder-option select, .folder-option input[type="text"] {
+            margin-top: 10px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            width: 100%;
+        }
+        
+        .new-folder-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .new-folder-inputs input {
+            flex: 1;
+        }
+        
+        .new-folder-inputs span {
+            font-weight: 600;
+            color: #666;
+        }
+        
         .parent-group {
             margin-bottom: 20px;
             border-left: 3px solid #667eea;
@@ -405,6 +452,36 @@
                 
                 <div class="columns-container" id="columnsContainer"></div>
                 
+                <!-- Output Folder Selection -->
+                <div class="section">
+                    <h3 class="section-title">Step 3: Choose Output Folder</h3>
+                    
+                    <div class="folder-options">
+                        <div class="folder-option">
+                            <input type="radio" id="defaultFolder" name="outputFolder" value="default" checked>
+                            <label for="defaultFolder">Use default folder (csv_filtered/)</label>
+                        </div>
+                        
+                        <div class="folder-option">
+                            <input type="radio" id="existingFolder" name="outputFolder" value="existing">
+                            <label for="existingFolder">Select existing folder:</label>
+                            <select id="existingFolderSelect" disabled>
+                                <option value="">Choose folder...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="folder-option">
+                            <input type="radio" id="newFolder" name="outputFolder" value="new">
+                            <label for="newFolder">Create new folder:</label>
+                            <div class="new-folder-inputs">
+                                <input type="text" id="newFolderName" placeholder="Folder name" disabled>
+                                <span>in</span>
+                                <input type="text" id="newFolderPath" placeholder="Parent path" value="C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean" disabled>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="button-group">
                     <button class="btn-secondary" onclick="selectAll()">Select All</button>
                     <button class="btn-secondary" onclick="deselectAll()">Deselect All</button>
@@ -590,6 +667,56 @@
             document.getElementById('selectedCount').textContent = selected;
         }
         
+        // Folder selection functions
+        function loadExistingFolders() {
+            fetch('/api/get-folders')
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('existingFolderSelect');
+                select.innerHTML = '<option value="">Choose folder...</option>';
+                data.folders.forEach(folder => {
+                    const option = document.createElement('option');
+                    option.value = folder.path;
+                    option.textContent = folder.name;
+                    select.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error loading folders:', error));
+        }
+        
+        function handleFolderOptionChange() {
+            const existingSelect = document.getElementById('existingFolderSelect');
+            const newName = document.getElementById('newFolderName');
+            const newPath = document.getElementById('newFolderPath');
+            
+            const selected = document.querySelector('input[name="outputFolder"]:checked').value;
+            
+            existingSelect.disabled = selected !== 'existing';
+            newName.disabled = selected !== 'new';
+            newPath.disabled = selected !== 'new';
+        }
+        
+        function getOutputPath() {
+            const selected = document.querySelector('input[name="outputFolder"]:checked').value;
+            
+            if (selected === 'default') {
+                return null; // Use default
+            } else if (selected === 'existing') {
+                const path = document.getElementById('existingFolderSelect').value;
+                if (!path) {
+                    throw new Error('Please select an existing folder.');
+                }
+                return path;
+            } else if (selected === 'new') {
+                const name = document.getElementById('newFolderName').value.trim();
+                const parentPath = document.getElementById('newFolderPath').value.trim();
+                if (!name || !parentPath) {
+                    throw new Error('Please provide both folder name and parent path.');
+                }
+                return { name: name, parentPath: parentPath };
+            }
+        }
+        
         function selectAll() {
             document.querySelectorAll('.column-checkbox, .parent-checkbox').forEach(cb => {
                 if (cb.closest('.parent-group, .child-item').style.display !== 'none') {
@@ -621,15 +748,30 @@
                 return;
             }
             
+            let outputPath;
+            try {
+                outputPath = getOutputPath();
+            } catch (error) {
+                showStatus(error.message, 'error');
+                return;
+            }
+            
             document.getElementById('saveBtn').disabled = true;
             document.getElementById('saveBtn').textContent = 'Saving...';
             
             fetch('/api/save-filtered', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ selected_columns: selected })
+                body: JSON.stringify({ selected_columns: selected, output_path: outputPath })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(`HTTP ${response.status}: ${text}`);
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 document.getElementById('saveBtn').disabled = false;
                 document.getElementById('saveBtn').textContent = 'Save Filtered CSVs';
@@ -647,7 +789,8 @@
             .catch(error => {
                 document.getElementById('saveBtn').disabled = false;
                 document.getElementById('saveBtn').textContent = 'Save Filtered CSVs';
-                showStatus('Error: ' + error, 'error');
+                console.error('Save error:', error);
+                showStatus('Error: ' + error.message, 'error');
             });
         }
         
@@ -656,6 +799,15 @@
             status.textContent = message;
             status.className = `status show ${type}`;
         }
+        
+        // Initialize folder options
+        document.addEventListener('DOMContentLoaded', function() {
+            loadExistingFolders();
+            document.querySelectorAll('input[name="outputFolder"]').forEach(radio => {
+                radio.addEventListener('change', handleFolderOptionChange);
+            });
+            handleFolderOptionChange(); // Set initial state
+        });
     </script>
 </body>
 </html>

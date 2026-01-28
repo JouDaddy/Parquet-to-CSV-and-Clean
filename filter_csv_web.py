@@ -98,6 +98,37 @@ def index():
     
     return render_template('filter.html', files=file_list)
 
+@app.route('/api/get-folders', methods=['GET'])
+def get_folders():
+    """Get list of existing folders for output selection"""
+    try:
+        folders = []
+        # Get folders from csv_filtered
+        if FILTERED_OUTPUT.exists():
+            for item in FILTERED_OUTPUT.iterdir():
+                if item.is_dir():
+                    folders.append({
+                        'name': item.name,
+                        'path': str(item)
+                    })
+        
+        # Also include csv_output folders as options
+        if CSV_OUTPUT.exists():
+            for item in CSV_OUTPUT.iterdir():
+                if item.is_dir():
+                    folder_path = FILTERED_OUTPUT / item.name
+                    if not any(f['path'] == str(folder_path) for f in folders):
+                        folders.append({
+                            'name': f"{item.name} (new)",
+                            'path': str(folder_path)
+                        })
+        
+        return jsonify({'folders': folders})
+    
+    except Exception as e:
+        log_to_file(f"[ERROR] Failed to get folders: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/validate-files', methods=['POST'])
 def validate_files():
     """Validate selected files have matching columns"""
@@ -184,11 +215,16 @@ def save_filtered():
     """Save filtered CSVs for all selected files"""
     global selected_csvs, current_dfs
     
+    log_to_file(f"[DEBUG] save-filtered called with method: {request.method}")
+    log_to_file(f"[DEBUG] Content-Type: {request.headers.get('Content-Type')}")
+    log_to_file(f"[DEBUG] Request data: {request.get_data()}")
+    
     try:
         if not current_dfs:
             raise ValueError("No files loaded")
         
         selected_columns = request.json.get('selected_columns', [])
+        output_path = request.json.get('output_path')
 
         if not selected_columns:
             raise ValueError("No columns selected to save.")
@@ -212,30 +248,62 @@ def save_filtered():
         total_saved = 0
         
         for csv_file in selected_csvs:
-            df = current_dfs[csv_file.name]
+            # Determine output directory
+            if output_path is None:
+                # Default behavior
+                source_folder = csv_file.parent.name
+                output_dir = FILTERED_OUTPUT / source_folder
+                log_to_file(f"[DEBUG] Using default output dir: {output_dir}")
+            elif isinstance(output_path, str):
+                # Existing folder selected
+                output_dir = Path(output_path)
+                log_to_file(f"[DEBUG] Using existing folder: {output_dir}")
+            elif isinstance(output_path, dict):
+                # New folder to create
+                parent_path_str = output_path['parentPath']
+                folder_name = output_path['name']
+                
+                # Validate inputs
+                if not parent_path_str or not folder_name:
+                    raise ValueError("Parent path and folder name cannot be empty")
+                
+                # Convert to Path object and resolve
+                parent_path = Path(parent_path_str).resolve()
+                if not parent_path.exists():
+                    raise ValueError(f"Parent path does not exist: {parent_path}")
+                
+                output_dir = parent_path / folder_name
+                log_to_file(f"[DEBUG] Creating new folder: {output_dir} (parent: {parent_path}, name: {folder_name})")
+            else:
+                raise ValueError("Invalid output path configuration")
             
-            # Get source folder
-            source_folder = csv_file.parent.name
-            filtered_subfolder = FILTERED_OUTPUT / source_folder
-            filtered_subfolder.mkdir(parents=True, exist_ok=True)
+            log_to_file(f"[DEBUG] Creating directory: {output_dir}")
+            output_dir.mkdir(parents=True, exist_ok=True)
             
             # Create filtered dataframe
             final_columns_unique = list(dict.fromkeys(final_columns))
-            filtered_df = df[final_columns_unique]
+            filtered_df = current_dfs[csv_file.name][final_columns_unique]
             
             # Save
             original_name = csv_file.stem
             filtered_name = f"{original_name}_filtered.csv"
-            output_path = filtered_subfolder / filtered_name
+            output_file_path = output_dir / filtered_name
             
-            filtered_df.to_csv(output_path, index=False, encoding='utf-8')
+            filtered_df.to_csv(output_file_path, index=False, encoding='utf-8')
             
-            file_size = output_path.stat().st_size / (1024 * 1024)
-            log_to_file(f"[SUCCESS] Saved: {source_folder}/{filtered_name} ({len(filtered_df)} rows, {len(final_columns_unique)} columns, {file_size:.2f} MB)")
+            file_size = output_file_path.stat().st_size / (1024 * 1024)
+            
+            # Determine display path
+            try:
+                display_path = output_file_path.relative_to(BASE_DIR)
+            except ValueError:
+                display_path = output_file_path
+            
+            log_to_file(f"[SUCCESS] Saved: {display_path} ({len(filtered_df)} rows, {len(final_columns_unique)} columns, {file_size:.2f} MB)")
             
             results.append({
                 'filename': filtered_name,
-                'path': f"{source_folder}/{filtered_name}",
+                'path': str(display_path),
                 'rows': len(filtered_df),
                 'columns': len(final_columns_unique),
                 'size': f"{file_size:.2f} MB"
@@ -265,8 +333,15 @@ if __name__ == '__main__':
     
     # Open browser
     def open_browser():
-        threading.Timer(1, lambda: webbrowser.open('http://127.0.0.1:5000')).start()
+        try:
+            threading.Timer(1, lambda: webbrowser.open('http://127.0.0.1:5000')).start()
+        except Exception as e:
+            log_to_file(f"[WARNING] Could not open browser automatically: {e}")
     
-    open_browser()
-    log_to_file("[INFO] Browser window opening...")
+    try:
+        open_browser()
+        log_to_file("[INFO] Browser window opening...")
+    except Exception as e:
+        log_to_file(f"[WARNING] Browser opening failed: {e}")
+    
     app.run(debug=False, port=5000)

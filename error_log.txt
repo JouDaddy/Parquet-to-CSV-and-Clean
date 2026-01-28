@@ -244,3 +244,63 @@
 [2026-01-27 16:22:58] WEB-BASED INTERACTIVE PLOTTER STARTED
 [2026-01-27 16:22:58] [INFO] Starting Flask server on http://localhost:5000
 [2026-01-27 16:23:05] [INFO] Listed 8 CSV files
+[2026-01-28 11:52:31] [INFO] CSV Column Filter (Web) initialized
+[2026-01-28 11:52:31] [INFO] Found 8 CSV file(s)
+[2026-01-28 11:52:31] [INFO] Browser window opening...
+[2026-01-28 11:53:45] [INFO] CSV Column Filter (Web) initialized
+[2026-01-28 11:53:45] [INFO] Found 8 CSV file(s)
+[2026-01-28 11:53:45] [INFO] Browser window opening...
+[2026-01-28 11:54:30] [INFO] CSV Column Filter (Web) initialized
+[2026-01-28 11:54:30] [INFO] Found 8 CSV file(s)
+[2026-01-28 11:54:30] [INFO] Browser window opening...
+[2026-01-28 11:57:41] [INFO] CSV Column Filter (Web) initialized
+[2026-01-28 11:57:41] [INFO] Found 8 CSV file(s)
+[2026-01-28 11:57:41] [INFO] Browser window opening...
+[2026-01-28 11:58:43] [INFO] CSV Column Filter (Web) initialized
+[2026-01-28 11:58:43] [INFO] Found 8 CSV file(s)
+[2026-01-28 11:58:43] [INFO] Browser window opening...
+[2026-01-28 11:59:25] [INFO] CSV Column Filter (Web) initialized
+[2026-01-28 11:59:25] [INFO] Found 8 CSV file(s)
+[2026-01-28 11:59:25] [INFO] Browser window opening...
+[2026-01-28 12:00:49] [INFO] CSV Column Filter (Web) initialized
+[2026-01-28 12:00:49] [INFO] Found 8 CSV file(s)
+[2026-01-28 12:00:49] [INFO] Browser window opening...
+[2026-01-28 12:00:55] [DEBUG] validate-files called with method: POST
+[2026-01-28 12:00:55] [DEBUG] Content-Type: application/json
+[2026-01-28 12:00:55] [DEBUG] Request data: b'{"indices":[7,6,5,4]}'
+[2026-01-28 12:00:55] [VALIDATING] pi_data_20251230_092335.csv
+[2026-01-28 12:00:59] [VALIDATING] pi_data_20251230_082720.csv
+[2026-01-28 12:01:02] [VALIDATING] pi_data_20251229_155201.csv
+[2026-01-28 12:01:05] [VALIDATING] pi_data_20251229_151817.csv
+[2026-01-28 12:01:09] [SUCCESS] Validated 4 files with matching columns: 189 columns
+[2026-01-28 12:03:09] [INFO] CSV Column Filter (Web) initialized
+[2026-01-28 12:03:09] [INFO] Found 8 CSV file(s)
+[2026-01-28 12:03:09] [INFO] Browser window opening...
+[2026-01-28 12:03:22] [VALIDATING] pi_data_20251230_092335.csv
+[2026-01-28 12:03:26] [VALIDATING] pi_data_20251230_082720.csv
+[2026-01-28 12:03:30] [VALIDATING] pi_data_20251229_151817.csv
+[2026-01-28 12:03:33] [VALIDATING] pi_data_20251229_155201.csv
+[2026-01-28 12:03:37] [SUCCESS] Validated 4 files with matching columns: 189 columns
+[2026-01-28 12:05:06] [INFO] CSV Column Filter (Web) initialized
+[2026-01-28 12:05:06] [INFO] Found 8 CSV file(s)
+[2026-01-28 12:05:06] [INFO] Browser window opening...
+[2026-01-28 12:05:13] [VALIDATING] pi_data_20251230_092335.csv
+[2026-01-28 12:05:16] [VALIDATING] pi_data_20251230_082720.csv
+[2026-01-28 12:05:19] [VALIDATING] pi_data_20251229_155201.csv
+[2026-01-28 12:05:22] [VALIDATING] pi_data_20251229_151817.csv
+[2026-01-28 12:05:25] [SUCCESS] Validated 4 files with matching columns: 189 columns
+[2026-01-28 12:05:37] [DEBUG] save-filtered called with method: POST
+[2026-01-28 12:05:37] [DEBUG] Content-Type: application/json
+[2026-01-28 12:05:37] [DEBUG] Request data: b'{"selected_columns":["timestamp","NAP2_Plant_Load.NAP2_Load_Output.0c3f2d01-3c65-4797-aae4-a03019b061c1"],"output_path":{"name":"csv_filtered_plant_load_data","parentPath":"C:\\\\Users\\\\EvanJacobs\\\\Documents\\\\OmniaOffline\\\\Parquet-to-CSV-and-Clean"}}'
+[2026-01-28 12:05:37] [DEBUG] Creating new folder: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\csv_filtered_plant_load_data (parent: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean, name: csv_filtered_plant_load_data)
+[2026-01-28 12:05:37] [DEBUG] Creating directory: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\csv_filtered_plant_load_data
+[2026-01-28 12:05:38] [SUCCESS] Saved: csv_filtered_plant_load_data\pi_data_20251230_092335_filtered.csv (172800 rows, 2 columns, 6.55 MB)
+[2026-01-28 12:05:38] [DEBUG] Creating new folder: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\csv_filtered_plant_load_data (parent: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean, name: csv_filtered_plant_load_data)
+[2026-01-28 12:05:38] [DEBUG] Creating directory: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\csv_filtered_plant_load_data
+[2026-01-28 12:05:38] [SUCCESS] Saved: csv_filtered_plant_load_data\pi_data_20251230_082720_filtered.csv (178560 rows, 2 columns, 6.77 MB)
+[2026-01-28 12:05:38] [DEBUG] Creating new folder: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\csv_filtered_plant_load_data (parent: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean, name: csv_filtered_plant_load_data)
+[2026-01-28 12:05:38] [DEBUG] Creating directory: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\csv_filtered_plant_load_data
+[2026-01-28 12:05:39] [SUCCESS] Saved: csv_filtered_plant_load_data\pi_data_20251229_155201_filtered.csv (172800 rows, 2 columns, 6.45 MB)
+[2026-01-28 12:05:39] [DEBUG] Creating new folder: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\csv_filtered_plant_load_data (parent: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean, name: csv_filtered_plant_load_data)
+[2026-01-28 12:05:39] [DEBUG] Creating directory: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\csv_filtered_plant_load_data
+[2026-01-28 12:05:39] [SUCCESS] Saved: csv_filtered_plant_load_data\pi_data_20251229_151817_filtered.csv (178560 rows, 2 columns, 6.61 MB)

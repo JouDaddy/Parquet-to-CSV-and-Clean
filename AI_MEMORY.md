@@ -2,7 +2,7 @@
 
 **Project:** OmniaOffline Data Cleaning  
 **Created:** 2026-01-22  
-**Last Updated:** 2026-01-23
+**Last Updated:** 2026-01-28
 
 ## Purpose
 This file serves as persistent AI context for understanding:
@@ -47,6 +47,58 @@ pip install pyarrow --upgrade
 3. Removed special unicode characters from log messages - use plain ASCII:
    - AVOID: `[SUCCESS]  file.csv` (arrow char causes issues)
    - USE: `[SUCCESS] CSV created: file.csv`
+
+**Status:** FIXED 
+
+---
+
+### Issue 3: Flask Web App Route and Folder Creation Errors
+**Error:** 
+- "POST /api/validate-files HTTP/1.1" 404 errors
+- "failed to fetch" when saving to new folders
+- Missing @app.route decorator causing endpoint not found
+
+**Root Cause:** 
+1. Missing Flask route decorator for `/api/validate-files` endpoint
+2. Insufficient error handling for folder creation paths
+3. No validation of parent directory existence before creating new folders
+
+**Solutions Applied:**
+1. **Restored missing route decorator:**
+   ```python
+   @app.route('/api/validate-files', methods=['POST'])
+   def validate_files():
+   ```
+
+2. **Added folder creation validation:**
+   ```python
+   # Validate parent path exists before creating new folder
+   parent_path = Path(parent_path_str).resolve()
+   if not parent_path.exists():
+       raise ValueError(f"Parent path does not exist: {parent_path}")
+   ```
+
+3. **Improved error handling in JavaScript:**
+   ```javascript
+   .then(response => {
+       if (!response.ok) {
+           return response.text().then(text => {
+               throw new Error(`HTTP ${response.status}: ${text}`);
+           });
+       }
+       return response.json();
+   })
+   ```
+
+4. **Added debug logging for troubleshooting:**
+   - Request method, headers, and data logging
+   - Path resolution and directory creation logging
+
+**Features Added:**
+- ✅ **Output folder selection**: Default, existing folder, or create new folder
+- ✅ **Custom folder creation**: Specify name and parent path
+- ✅ **Path validation**: Checks parent directory exists
+- ✅ **Better error messages**: Specific HTTP status and error details
 
 **Status:** FIXED 
 
@@ -106,8 +158,11 @@ OmniaOffline/Data Cleaning/
  csv_filtered/                  Filtered CSV outputs
     ANP2 for July - Nov 2025/  Filtered ANP2 files
     NAP2 for July - Nov 2025/  Filtered NAP2 files
+ templates/                      Web app templates
+    filter.html                 CSV filter web interface
  transform_parquet.py           Main conversion script
- filter_csv_columns.py          Column filter script
+ filter_csv_columns.py          Column filter script (CLI)
+ filter_csv_web.py              Column filter script (Web UI)
  error_log.txt                  Execution log (auto-created)
  AI_MEMORY.md                   This file
  .venv/                         Python virtual environment
@@ -145,6 +200,27 @@ Every script created and run in this project logs all operations to error_log.tx
 - Records transformation history
 - Tracks known issues
 - Documents all script versions and updates
+
+## Available Scripts
+
+### transform_parquet.py (Main Conversion)
+**Purpose:** Convert Parquet files to CSV format
+**Usage:** `python transform_parquet.py`
+**Output:** Creates CSV files in `csv_output/` folders
+
+### filter_csv_columns.py (CLI Column Filter)
+**Purpose:** Filter CSV columns via command line interface
+**Usage:** `python filter_csv_columns.py`
+**Features:** Interactive column selection, search functionality
+
+### filter_csv_web.py (Web Column Filter)
+**Purpose:** Filter CSV columns via web browser interface
+**Usage:** `python filter_csv_web.py` then open http://127.0.0.1:5000
+**Features:** 
+- Web-based column selection with search
+- Multiple output folder options (default, existing, or create new)
+- Real-time validation and error handling
+- Batch processing of multiple CSV files
 
 ## Data Schema Info
 [To be updated - run data_analysis.py to extract schema]
