@@ -304,3 +304,18 @@
 [2026-01-28 12:05:39] [DEBUG] Creating new folder: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\csv_filtered_plant_load_data (parent: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean, name: csv_filtered_plant_load_data)
 [2026-01-28 12:05:39] [DEBUG] Creating directory: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\csv_filtered_plant_load_data
 [2026-01-28 12:05:39] [SUCCESS] Saved: csv_filtered_plant_load_data\pi_data_20251229_151817_filtered.csv (178560 rows, 2 columns, 6.61 MB)
+[2026-01-28 14:00:53] [INFO] CSV Column Filter (Web) initialized
+[2026-01-28 14:00:53] [INFO] Found 8 CSV file(s)
+[2026-01-28 14:00:53] [INFO] Browser window opening...
+[2026-01-28 14:01:16] [VALIDATING] pi_data_20251229_155201.csv
+[2026-01-28 14:01:21] [VALIDATING] pi_data_20251230_082720.csv
+[2026-01-28 14:01:25] [SUCCESS] Validated 2 files with matching columns: 189 columns
+[2026-01-28 14:08:40] [DEBUG] save-filtered called with method: POST
+[2026-01-28 14:08:40] [DEBUG] Content-Type: application/json
+[2026-01-28 14:08:40] [DEBUG] Request data: b'{"selected_columns":["95FFIC008/OUT","95FFIC008/PV","95FFIC008/SP","95HIC008/PV","95HIC008/SP","95TI417/PV","95FI003C/PV","95FI004A/PV","95HIC007/PV","95HIC007/SP","95HIC403/PV","95TI002/PV","95FI003A/PV","95FI004C/PV","95LIC001/AO1/OUT","95LIC001/OUT","95LIC001/PV","95LIC001/SP","97AI08/PV","95FIC024/OUT","95FIC024/PV","95FIC024/SP","95TI016B/PV","95HIC404/PV","timestamp","95PI007A/PV","95DI023/PV","95TI038/PV","NAP2_Plant_Load.NAP2_Load_Output.0c3f2d01-3c65-4797-aae4-a03019b061c1","95FI003B/PV","95TI016C/PV","95FI004B/PV","95TI016A/PV"],"output_path":{"name":"month_3_data","parentPath":"C:\\\\Users\\\\EvanJacobs\\\\Documents\\\\OmniaOffline\\\\Parquet-to-CSV-and-Clean"}}'
+[2026-01-28 14:08:40] [DEBUG] Creating new folder: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\month_3_data (parent: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean, name: month_3_data)
+[2026-01-28 14:08:40] [DEBUG] Creating directory: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\month_3_data
+[2026-01-28 14:08:44] [SUCCESS] Saved: month_3_data\pi_data_20251229_155201_filtered.csv (172800 rows, 33 columns, 50.51 MB)
+[2026-01-28 14:08:44] [DEBUG] Creating new folder: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\month_3_data (parent: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean, name: month_3_data)
+[2026-01-28 14:08:44] [DEBUG] Creating directory: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\month_3_data
+[2026-01-28 14:08:48] [SUCCESS] Saved: month_3_data\pi_data_20251230_082720_filtered.csv (178560 rows, 33 columns, 52.58 MB)
