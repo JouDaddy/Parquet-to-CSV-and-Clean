@@ -319,3 +319,21 @@
 [2026-01-28 14:08:44] [DEBUG] Creating new folder: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\month_3_data (parent: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean, name: month_3_data)
 [2026-01-28 14:08:44] [DEBUG] Creating directory: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\month_3_data
 [2026-01-28 14:08:48] [SUCCESS] Saved: month_3_data\pi_data_20251230_082720_filtered.csv (178560 rows, 33 columns, 52.58 MB)
+[2026-01-29 08:21:44] [INFO] CSV Column Filter (Web) initialized
+[2026-01-29 08:21:44] [INFO] Found 8 CSV file(s)
+[2026-01-29 08:21:44] [INFO] Browser window opening...
+[2026-01-29 08:21:53] [VALIDATING] pi_data_20251230_143627.csv
+[2026-01-29 08:21:55] [VALIDATING] pi_data_20251230_141953.csv
+[2026-01-29 08:21:56] [SUCCESS] Validated 2 files with matching columns: 63 columns
+[2026-01-29 08:24:45] [VALIDATING] pi_data_20251230_143627.csv
+[2026-01-29 08:24:46] [VALIDATING] pi_data_20251230_141953.csv
+[2026-01-29 08:24:47] [SUCCESS] Validated 2 files with matching columns: 63 columns
+[2026-01-29 08:35:46] [DEBUG] save-filtered called with method: POST
+[2026-01-29 08:35:46] [DEBUG] Content-Type: application/json
+[2026-01-29 08:35:46] [DEBUG] Request data: b'{"selected_columns":["96PI011/PV","96FFIC005/OUT","96FFIC005/PV","96FFIC005/SP","96FIC005/OUT","96FIC005/PV","96FIC005/SP","timestamp","96FIC002/OUT","96FIC002/PV","96FIC002/SP","96AIC002/OUT","96AIC002/PV","96AIC002/SP","96TI015/PV"],"output_path":null}'
+[2026-01-29 08:35:46] [DEBUG] Using default output dir: c:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\csv_filtered\ANP2 for July - Nov 2025
+[2026-01-29 08:35:46] [DEBUG] Creating directory: c:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\csv_filtered\ANP2 for July - Nov 2025
+[2026-01-29 08:35:47] [SUCCESS] Saved: csv_filtered\ANP2 for July - Nov 2025\pi_data_20251230_143627_filtered.csv (172800 rows, 15 columns, 22.59 MB)
+[2026-01-29 08:35:47] [DEBUG] Using default output dir: c:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\csv_filtered\ANP2 for July - Nov 2025
+[2026-01-29 08:35:47] [DEBUG] Creating directory: c:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\csv_filtered\ANP2 for July - Nov 2025
+[2026-01-29 08:35:48] [SUCCESS] Saved: csv_filtered\ANP2 for July - Nov 2025\pi_data_20251230_141953_filtered.csv (178560 rows, 15 columns, 23.39 MB)
