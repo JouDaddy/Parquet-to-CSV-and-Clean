@@ -337,3 +337,18 @@
 [2026-01-29 08:35:47] [DEBUG] Using default output dir: c:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\csv_filtered\ANP2 for July - Nov 2025
 [2026-01-29 08:35:47] [DEBUG] Creating directory: c:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\csv_filtered\ANP2 for July - Nov 2025
 [2026-01-29 08:35:48] [SUCCESS] Saved: csv_filtered\ANP2 for July - Nov 2025\pi_data_20251230_141953_filtered.csv (178560 rows, 15 columns, 23.39 MB)
+[2026-01-29 13:35:04] [INFO] CSV Column Filter (Web) initialized
+[2026-01-29 13:35:04] [INFO] Found 8 CSV file(s)
+[2026-01-29 13:35:04] [INFO] Browser window opening...
+[2026-01-29 13:35:13] [VALIDATING] pi_data_20251230_082720.csv
+[2026-01-29 13:35:16] [VALIDATING] pi_data_20251230_092335.csv
+[2026-01-29 13:35:20] [SUCCESS] Validated 2 files with matching columns: 189 columns
+[2026-01-29 13:40:44] [DEBUG] save-filtered called with method: POST
+[2026-01-29 13:40:44] [DEBUG] Content-Type: application/json
+[2026-01-29 13:40:44] [DEBUG] Request data: b'{"selected_columns":["95TI023/PV","95DI023/PV","timestamp","95DY023/PV"],"output_path":{"name":"Density_Acid_Final_Product","parentPath":"C:\\\\Users\\\\EvanJacobs\\\\Documents\\\\OmniaOffline\\\\Parquet-to-CSV-and-Clean"}}'
+[2026-01-29 13:40:44] [DEBUG] Creating new folder: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\Density_Acid_Final_Product (parent: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean, name: Density_Acid_Final_Product)
+[2026-01-29 13:40:44] [DEBUG] Creating directory: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\Density_Acid_Final_Product
+[2026-01-29 13:40:45] [SUCCESS] Saved: Density_Acid_Final_Product\pi_data_20251230_082720_filtered.csv (178560 rows, 4 columns, 8.63 MB)
+[2026-01-29 13:40:45] [DEBUG] Creating new folder: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\Density_Acid_Final_Product (parent: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean, name: Density_Acid_Final_Product)
+[2026-01-29 13:40:45] [DEBUG] Creating directory: C:\Users\EvanJacobs\Documents\OmniaOffline\Parquet-to-CSV-and-Clean\Density_Acid_Final_Product
+[2026-01-29 13:40:45] [SUCCESS] Saved: Density_Acid_Final_Product\pi_data_20251230_092335_filtered.csv (172800 rows, 4 columns, 8.35 MB)
